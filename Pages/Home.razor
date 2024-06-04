@@ -1,0 +1,16 @@
+﻿@page "/home"
+@using Bike_Service_IMS.Data;
+
+<MudCard>
+    <MudCardContent>
+        <MudText><h1>Welcome To Bike Inventory System</h1></MudText>
+        <MudText Typo="Typo.body2">This is the inventory management system for the bike service center.</MudText>
+        <MudText><p> A perfect bike inventory management to fulfill all your needs and help your buisness grow </p></MudText>
+    </MudCardContent>
+    
+</MudCard>
+
+@code {
+	[Parameter]
+	public string Username { get; set; }
+}

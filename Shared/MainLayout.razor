@@ -1,0 +1,27 @@
+﻿@using Bike_Service_IMS.Data;
+@inherits LayoutComponentBase
+<MudThemeProvider />
+<div class="page">
+	@if (userState.CurrentUser != null)
+	{
+		<div class="sidebar">
+			<NavMenu Username="@userState.CurrentUser.Username" UserRole="@userState.CurrentUser.Role" />
+		</div>
+	}
+	<main>
+		<article class="content px-4">
+			<CascadingValue Value="@userState">
+				@Body
+			</CascadingValue>
+		</article>
+	</main>
+</div>
+@code
+{
+	private UserState userState = new UserState();
+	protected override void OnInitialized()
+	{
+		UserServices.SeedUsers();
+	}
+}
+

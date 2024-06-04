@@ -1,0 +1,31 @@
+﻿@page "/logout"
+@using Bike_Service_IMS.Data;
+@inject NavigationManager NavManager
+<MudCard>
+    <MudCardHeader>
+        <CardHeaderContent>
+            <MudText Typo="Typo.h5">Log Out</MudText>
+        </CardHeaderContent>
+    </MudCardHeader>
+    <MudCardContent>
+        <MudText Typo="Typo.h6">Are you sure you want to logout?</MudText>
+    </MudCardContent>
+    <MudCardActions>
+        <MudButton Variant="Variant.Filled" Color="Color.Error" OnClick="LogoutUser" Class="col-md-2 me-2">Yes</MudButton>
+        <MudButton Variant="Variant.Filled" Color="Color.Surface" OnClick="Redirect" Class="col-md-2">No</MudButton>
+    </MudCardActions>
+</MudCard>
+@code
+{
+    [CascadingParameter]
+    UserState userState { get; set; }
+    public void LogoutUser()
+    {
+        userState.CurrentUser = null;
+        NavManager.NavigateTo("/login");
+    }
+    public void Redirect()
+    {
+        NavManager.NavigateTo("/home");
+    }
+}

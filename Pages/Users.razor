@@ -1,0 +1,159 @@
+﻿@page "/users"
+@using System.ComponentModel.DataAnnotations
+@using Bike_Service_IMS.Data;
+<MudAppBar Color="Color.Transparent" Fixed="false" Class="mb-3">
+    <div><h1>Users</h1></div>
+    <MudSpacer />
+    <div class="align-users-center">
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="ShowForm">Create User</MudButton>
+    </div>
+</MudAppBar>
+
+@if (showUserForm == true)
+{
+    <MudCard class="mt-5">
+        <MudCardContent>
+            <MudForm >
+                <MudTextField Label="Fullname" @bind-Value="Fullname" />
+                <MudTextField Label="Username" @bind-Value="Username" />
+                <MudTextField Label="Password" @bind-Value="Password" InputType="InputType.Password" />
+                <MudRadioGroup @bind-SelectedOption="@SelectedOption">
+                    <MudRadio Option="@("Admin")" Color="Color.Primary">Admin</MudRadio>
+                    <MudRadio Option="@("Staff")" Color="Color.Secondary">Staff</MudRadio>
+                </MudRadioGroup>
+                @if (showError == true)
+                {
+                    <MudAlert Severity="Severity.Error">@addUserMessage</MudAlert>
+                }
+                <MudButton OnClick="AddUser" Variant="Variant.Filled" Color="Color.Primary" class="mt-3 me-2">
+                    Add User
+                </MudButton>
+                <MudButton OnClick="HideForm" Variant="Variant.Filled" Color="Color.Primary" class="mt-3">
+                    Close
+                </MudButton>
+            </MudForm>
+        </MudCardContent>
+    </MudCard>
+}
+<MudSimpleTable Style="overflow-x: auto;" Class="mt-4">
+    <thead>
+        <tr>
+            <th>Fullname</th>
+            <th>Username</th>
+            <th>Role</th>
+            <th>Created At</th>
+            <th>Created By</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var user in users)
+        {
+            <tr>
+                <td>@user.Fullname</td>
+                <td>@user.Username</td>
+                <td>@user.Role</td>
+                <td>@user.CreatedAt.ToString("MMM dd, yyyy h:mm tt")</td>
+                <td>@user.CreatedBy</td>   
+                 @if (user.Username != "admin")
+                 {
+                    <td>
+                      <MudButton OnClick="()=>Delete(user)" Variant="Variant.Filled" Color="Color.Primary" class="mt-3">
+                        Delete
+                      </MudButton>
+                    </td>
+                 }else 
+                 {
+                    <td>
+                       <MudAlert Severity="Severity.Info">Super User</MudAlert>
+                    </td>
+                 }
+            </tr>
+        }
+    </tbody>
+</MudSimpleTable>
+@if (showDeleteMessage == true)
+{
+    <MudCard Class="mt-4">
+        <MudCardContent>
+            <MudText Typo="Typo.h5">Do you want to delete user <strong>@deleteUser.Username</strong>?</MudText>
+        </MudCardContent>
+        <MudCardActions>
+            <MudButton Variant="Variant.Filled" Color="Color.Success" Class="col-md-1 me-2" OnClick="DeleteUser">Yes</MudButton>
+            <MudButton Variant="Variant.Filled" Color="Color.Error" Class="col-md-1" OnClick="CloseCard">No</MudButton>
+        </MudCardActions>
+    </MudCard>
+}
+
+@code {
+    private string Fullname { get; set; }
+    private string Username { get; set; }
+    private string Password { get; set; }
+    private List<User> users { get; set; }
+    private User deleteUser { get; set; }
+    [CascadingParameter]
+    UserState userState { get; set; }
+    public string SelectedOption { get; set; }
+    private string addUserMessage = "";
+    bool showError = false;
+    bool showUserForm = false;
+    bool showDeleteMessage = false;
+    private string deleteErrorMessage = "";
+    protected override void OnInitialized()
+    {
+        users = UserServices.Read();
+    }
+
+    public void ShowForm()
+    {
+        showUserForm = true;
+    }
+    public void HideForm()
+    {
+        showUserForm = false;
+    }
+    public void CloseCard()
+    {
+        showDeleteMessage = false;
+    }
+    private void AddUser()
+    {
+        try
+        {
+            if (!String.IsNullOrEmpty(Username) && !String.IsNullOrEmpty(Password) && !String.IsNullOrEmpty(SelectedOption))
+            {
+                showError = false;
+                users = UserServices.Add(userState.CurrentUser.Username, Fullname, Username, Password, SelectedOption);
+            }else
+            {
+                showError = true;
+                addUserMessage = "Please fill the form properly!";
+            }
+        }
+        catch (Exception e)
+        {
+            showError = true;
+            addUserMessage = e.Message;
+        }
+    }
+    private void Delete(User user)
+    {
+        deleteUser=user;
+        showDeleteMessage = true;
+    }
+    private void DeleteUser()
+    {
+        try
+        {
+            deleteErrorMessage = "";
+            users = UserServices.Delete(deleteUser.Username);
+            CloseCard();
+            deleteUser = null;
+        }
+        catch (Exception e)
+        {
+            deleteErrorMessage = e.Message;
+        }
+    }
+
+}

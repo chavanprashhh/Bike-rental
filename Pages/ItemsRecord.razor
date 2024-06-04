@@ -1,0 +1,131 @@
+﻿@page "/record"
+@using Bike_Service_IMS.Data;
+@if (isOpen == true)
+{
+    @if (userState.CurrentUser.Role == "Staff")
+    {
+        <MudAppBar Color="Color.Transparent" Fixed="false" Class="mb-3">
+            <div><h1>Item Records</h1></div>
+            <MudSpacer />
+            @if (showRequestForm != true)
+            {
+                <div class="align-users-center">
+                    <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="ShowForm">Request Items</MudButton>
+                </div>
+            }
+        </MudAppBar>
+    }
+    @if (showRequestForm == true)
+    {
+        <MudCard class="mt-5">
+            <MudCardContent>
+                <MudForm>
+                    <MudSelect @bind-Value="Name" Label="Select Item"  AdornmentColor="Color.Secondary">
+                        @foreach (var item in items)
+                        {
+                            <MudSelectItem Value="@item.Name">@item.Name</MudSelectItem>
+                        }
+                    </MudSelect>
+                    <MudTextField Label="Quantity" @bind-Value="Quantity" />
+                    @if (showError == true)
+                    {
+                        <MudAlert Severity="Severity.Error">@reqItemMessage</MudAlert>
+                    }
+                    @if (successMessage == true)
+                    {
+                        <MudAlert Severity="Severity.Success">@reqItemMessage</MudAlert>
+                    }
+                    <MudButton Variant="Variant.Filled" Color="Color.Primary" class="mt-3 me-2" OnClick="@RequestItem">Request</MudButton>
+                    <MudButton Variant="Variant.Filled" Color="Color.Primary" class="mt-3" OnClick="@HideForm">Close</MudButton>
+                </MudForm>
+            </MudCardContent>
+        </MudCard>
+    }
+}
+<MudAppBar Color="Color.Transparent" Fixed="false">
+    <MudText Typo="Typo.h5" Class="fw-bold">Approved Item Requests</MudText>
+</MudAppBar>
+
+<MudSimpleTable Style="overflow-x: auto;" Class="mt-4">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Quantity</th>
+            <th>Requested Date</th>
+            <th>Requested By</th>
+            <th>Approved Date</th>
+            <th>Approved By</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var requests in itemReqs)
+        {
+            @if (requests.IsApproved == true)
+            {
+                <tr>
+                    <td>@requests.Name</td>
+                    <td>@requests.Quantity</td>
+                    <td>@requests.RequestedDate.ToString("MMM dd, yyyy h:mm tt")</td>
+                    <td>@requests.RequestedBy</td>
+                    <td>@requests.ApprovedDate.ToString("MMM dd, yyyy h:mm tt")</td>
+                    <td>@requests.ApprovedBy</td>
+                </tr>
+            }
+        }
+    </tbody>
+</MudSimpleTable>
+@code {
+    [CascadingParameter]
+    UserState userState { get; set; }
+    public string Name { get; set; }
+    public int Quantity { get; set; }
+    List<Item> items = UserServices.ReadItem();
+    List<ItemRequest> itemReqs { get; set; }
+    public string reqItemMessage = "";
+    bool showRequestForm = false;
+    bool showError = false;
+    bool successMessage = false;
+    public bool isOpen { get; set; }
+    protected override void OnInitialized()
+    {
+        isOpen = UserServices.CheckTime();
+        itemReqs = UserServices.ReadItemReq();
+    }
+    public void ShowForm()
+    {
+        showRequestForm = true;
+    }
+    public void HideForm()
+    {
+        Name = "";
+        Quantity = 0;
+        successMessage = false;
+        reqItemMessage = "";
+        showRequestForm = false;
+    }
+    public void RequestItem()
+    {
+        try 
+        {
+            if (String.IsNullOrEmpty(Name) && Quantity == 0)
+            {
+                showError=true;
+                successMessage = false;
+                reqItemMessage = "Enter the details properly!";
+            }
+            else
+            {
+                showError = false;
+                successMessage = true;
+                reqItemMessage = "Item Requested Successfully!";
+                itemReqs = UserServices.AddItemReq(Name, Quantity, userState.CurrentUser.Username);
+            }
+            
+        }
+        catch(Exception e)
+        {
+            showError = true;
+            reqItemMessage = e.Message;
+        }
+    }
+}

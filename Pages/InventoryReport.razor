@@ -1,0 +1,48 @@
+﻿@page "/report"
+@using Bike_Service_IMS.Data;
+<MudText Typo="Typo.h5" Class="fw-bold">Invetory Item History</MudText>
+<MudSimpleTable Style="overflow-x: auto;" Class="mt-5">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Total Quantity Taken</th>
+            <th>Last Taken Date</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in items)
+        {
+            @if (item.TotalQuantityTaken>0)
+            {
+                <tr>
+                    <td>@item.Name</td>
+                    <td>@item.TotalQuantityTaken</td>
+                    <td>@item.LastApprovedDate.ToString("MMM dd, yyyy h:mm tt")</td>
+                </tr>
+            }
+
+        }
+    </tbody>
+</MudSimpleTable>
+<div>
+    <MudChart ChartType="ChartType.Bar" ChartSeries="@Series" XAxisLabels="@XAxisLabels" Width="100%" Height="250px"></MudChart>
+</div>
+@code {
+    public List<Item> items { get; set; }
+    protected override void OnInitialized()
+    {
+        items = UserServices.ReadItem();
+    }
+    public static List<double> datas = UserServices.GetChartData();
+    public static List<string> labels = UserServices.GetChartLabel();
+    public static double[] doubleDatas = datas.ToArray();
+    public static string[] stringLabels = labels.ToArray();
+    public List<ChartSeries> Series = new List<ChartSeries>()
+    {
+        new ChartSeries() { Name = "Total Quantity Taken", Data = doubleDatas },
+    };
+    public string[] XAxisLabels = stringLabels;
+}
+
+
+

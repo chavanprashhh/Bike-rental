@@ -1,0 +1,75 @@
+﻿@using Bike_Service_IMS.Data;
+@inject NavigationManager NavManager;
+<div class="top-row ps-3 navbar navbar-dark">
+	<div class="container-fluid">
+		<a class="navbar-brand" href="">Bike Inventory</a>
+		<button title="Navigation menu" class="navbar-toggler" @onclick="ToggleNavMenu">
+			<span class="navbar-toggler-icon"></span>
+		</button>
+	</div>
+</div>
+
+<div class="ps-5 container-fluid">
+	<h5 class="welcome">Welcome, @Username</h5>
+</div>
+
+<div class="@NavMenuCssClass" @onclick="ToggleNavMenu">
+	<nav class="flex-column">
+		<div class="nav-item px-3">
+			<NavLink class="nav-link" href="home">
+				<span class="oi oi-home" aria-hidden="true"></span> Home
+			</NavLink>
+		</div>
+		<div class="nav-item px-3">
+			<NavLink class="nav-link" href="inventory">
+				<span class="oi oi-folder" aria-hidden="true"></span> Inventory
+			</NavLink>
+		</div>
+		@if(UserRole == "Admin")
+		{
+			<div class="nav-item px-3">
+				<NavLink class="nav-link" href="report">
+					<span class="oi oi-bar-chart" aria-hidden="true"></span> Report
+				</NavLink>
+			</div>
+			<div class="nav-item px-3">
+				<NavLink class="nav-link" href="users">
+					<span class="oi oi-person" aria-hidden="true"></span> Users
+				</NavLink>
+			</div>
+			<div class="nav-item px-3">
+				<NavLink class="nav-link" href="approve">
+					<span class="oi oi-circle-check" aria-hidden="true"></span> Approve Requests
+				</NavLink>
+			</div>
+		}
+		@if(UserRole == "Staff")
+		{
+			<div class="nav-item px-3">
+				<NavLink class="nav-link" href="record">
+					<span class="oi oi-list-rich" aria-hidden="true"></span> Item Records
+				</NavLink>
+			</div>
+		}
+		<div class="nav-item px-3">
+			<NavLink class="nav-link text-danger" href="logout">
+				<span class="oi oi-account-logout" aria-hidden="true"></span> Log out
+			</NavLink>
+		</div>
+	</nav>
+</div>
+
+@code {
+	[Parameter]
+	public string Username { get; set; }
+	[Parameter]
+	public string UserRole { get; set; }
+	private bool collapseNavMenu = true;
+
+	private string NavMenuCssClass => collapseNavMenu ? "collapse" : null;
+
+	private void ToggleNavMenu()
+	{
+		collapseNavMenu = !collapseNavMenu;
+	}
+}

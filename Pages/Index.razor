@@ -1,0 +1,19 @@
+﻿@page "/"
+@using Bike_Service_IMS.Data;
+@inject NavigationManager NavManager
+@code {
+    [CascadingParameter]
+    private UserState userState { get; set; }
+
+    protected override void OnInitialized()
+    {
+        if (userState.CurrentUser == null)
+        {
+            NavManager.NavigateTo("/login");
+        }
+        else
+        {
+            NavManager.NavigateTo("/home");
+        }
+    }
+}
